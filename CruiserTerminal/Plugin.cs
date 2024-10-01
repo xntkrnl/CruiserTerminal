@@ -8,7 +8,6 @@ using UnityEngine;
 namespace CruiserTerminal
 {
     [BepInPlugin(modGUID, modName, modVersion)]
-    [BepInDependency("ainavt.lc.lethalconfig")]
     public class CTPlugin : BaseUnityPlugin
     {
         // Mod Details
