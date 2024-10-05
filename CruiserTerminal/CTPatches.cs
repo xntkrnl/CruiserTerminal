@@ -9,6 +9,5 @@ namespace CruiserTerminal
         {
             CTFunctions.Spawn();
         }
-
     }
 }
