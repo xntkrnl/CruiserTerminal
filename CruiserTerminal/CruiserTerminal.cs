@@ -20,8 +20,7 @@ namespace CruiserTerminal
         public AudioClip enterTerminalSFX;
         public AudioClip leaveTerminalSFX;
         public Light terminalLight;
-
-        private float timeSinceLastKeyboardPress;
+        public GameObject cruiser;
 
         private void Awake()
         {
