@@ -20,7 +20,7 @@ namespace CruiserTerminal
         public AudioClip enterTerminalSFX;
         public AudioClip leaveTerminalSFX;
         public Light terminalLight;
-        public GameObject cruiser;
+        public VehicleController cruiserController;
 
         private void Awake()
         {
@@ -32,6 +32,7 @@ namespace CruiserTerminal
         {
             cruiserTerminal = GameObject.Find("Cruiser Terminal");
             terminalPos = GameObject.Find("terminalPosition");
+            cruiserController = GameObject.Find("CompanyCruiser(Clone)").GetComponent<VehicleController>();
 
             interactTrigger = base.gameObject.GetComponent<InteractTrigger>();
 
@@ -76,6 +77,10 @@ namespace CruiserTerminal
 
         public void BeginUsingCruiserTerminal()
         {
+            if (cruiserTerminalInUse)
+                return;
+
+            cruiserController.SetVehicleCollisionForPlayer(false, GameNetworkManager.Instance.localPlayerController);
             cruiserTerminalInUse = true;
             StartCoroutine(waitUntilFrameEndToSetActive(true));
             terminalScript.BeginUsingTerminal();
@@ -92,6 +97,7 @@ namespace CruiserTerminal
 
         public void QuitCruiserTerminal()
         {
+            cruiserController.SetVehicleCollisionForPlayer(true, GameNetworkManager.Instance.localPlayerController);
             terminalScript.QuitTerminal();
             interactTrigger.StopSpecialAnimation();
 
