@@ -23,6 +23,8 @@ namespace CruiserTerminal
 
         private static CTPlugin Instance;
 
+        public static GameObject terminalPrefab;
+
         void Awake()
         {
             Instance = this;

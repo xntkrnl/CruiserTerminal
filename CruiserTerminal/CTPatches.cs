@@ -16,11 +16,11 @@ namespace CruiserTerminal
         [HarmonyPatch(typeof(GameNetworkManager), "Start")]
         private static void AddPrefabsToNetwork()
         {
-            GameObject terminalPrefab = CTPlugin.mainAssetBundle.LoadAsset<GameObject>("CruiserTerminal.prefab");
-            NetworkManager.Singleton.AddNetworkPrefab(terminalPrefab);
+            CTPlugin.terminalPrefab = CTPlugin.mainAssetBundle.LoadAsset<GameObject>("CruiserTerminal.prefab");
+            NetworkManager.Singleton.AddNetworkPrefab(CTPlugin.terminalPrefab);
 
-            GameObject terminalPosPrefab = CTPlugin.mainAssetBundle.LoadAsset<GameObject>("terminalPosition.prefab");
-            NetworkManager.Singleton.AddNetworkPrefab(terminalPosPrefab);
+            //GameObject terminalPosPrefab = CTPlugin.mainAssetBundle.LoadAsset<GameObject>("terminalPosition.prefab");
+            //NetworkManager.Singleton.AddNetworkPrefab(terminalPosPrefab);
         }
     }
 }

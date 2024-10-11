@@ -10,30 +10,20 @@ namespace CruiserTerminal
         {
             ///Cruiser Terminal
             var cruiser = GameObject.Find("CompanyCruiser(Clone)");
-            var terminal = GameObject.Instantiate(CTPlugin.mainAssetBundle.LoadAsset("CruiserTerminal.prefab") as GameObject);
-
-            var cruiserNO = cruiser.GetComponent<NetworkObject>();
-            var terminalNO = terminal.GetComponent<NetworkObject>();
-
-            CTPlugin.mls.LogInfo("terminalNO is null = " + (terminalNO == null));
-            CTPlugin.mls.LogInfo("cruiserNO is null = " + (cruiserNO == null));
-
-            //bool tmp = terminalNO.TrySetParent(cruiserNO);
-            //CTPlugin.mls.LogInfo("tmp is = " + tmp);
+            var terminal = GameObject.Instantiate(CTPlugin.terminalPrefab);
             terminal.name = "Cruiser Terminal";
 
+            var cruiserNO = cruiser.GetComponent<NetworkObject>();
+
+            CTPlugin.mls.LogInfo("cruiserNO is null = " + (cruiserNO == null));
+
             ///terminalPosition
-            GameObject terminalPosition = GameObject.Instantiate(CTPlugin.mainAssetBundle.LoadAsset("terminalPosition.prefab") as GameObject);
-            var terminalPositionNO = terminalPosition.GetComponent<NetworkObject>();
-            terminalPosition.name = "terminalPosition";
+            GameObject terminalPosition = new GameObject("terminalPosition");
 
             if (NetworkManager.Singleton.IsHost)
-            {
-                terminalNO.Spawn();
-                terminalPositionNO.Spawn();
-            }
+                terminal.GetComponent<NetworkObject>().Spawn();
 
-            terminalPositionNO.TrySetParent(cruiserNO);
+            terminalPosition.transform.SetParent(cruiser.transform);
             terminalPosition.transform.localPosition = new Vector3(1.293f, 0.938f, -3.274f);
         }
     }
