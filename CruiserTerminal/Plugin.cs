@@ -25,8 +25,27 @@ namespace CruiserTerminal
 
         public static GameObject terminalPrefab;
 
+        private static void NetcodePatcher()
+        {
+            var types = Assembly.GetExecutingAssembly().GetTypes();
+            foreach (var type in types)
+            {
+                var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                foreach (var method in methods)
+                {
+                    var attributes = method.GetCustomAttributes(typeof(RuntimeInitializeOnLoadMethodAttribute), false);
+                    if (attributes.Length > 0)
+                    {
+                        method.Invoke(null, null);
+                    }
+                }
+            }
+        }
+
         void Awake()
         {
+            NetcodePatcher();
+
             Instance = this;
             mls = BepInEx.Logging.Logger.CreateLogSource("Cruiser Terminal");
             mls = Logger;
