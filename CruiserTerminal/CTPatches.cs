@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,15 +13,18 @@ namespace CruiserTerminal
             CTFunctions.Spawn();
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameNetworkManager), "Start")]
-        private static void AddPrefabsToNetwork()
+        [HarmonyPostfix, HarmonyPatch(typeof(GameNetworkManager), "Start")]
+        static void AddPrefabsToNetwork()
         {
             CTPlugin.terminalPrefab = CTPlugin.mainAssetBundle.LoadAsset<GameObject>("CruiserTerminal.prefab");
             NetworkManager.Singleton.AddNetworkPrefab(CTPlugin.terminalPrefab);
+        }
 
-            //GameObject terminalPosPrefab = CTPlugin.mainAssetBundle.LoadAsset<GameObject>("terminalPosition.prefab");
-            //NetworkManager.Singleton.AddNetworkPrefab(terminalPosPrefab);
+        [HarmonyPostfix, HarmonyPatch(typeof(Terminal), "OnDisable")]
+        static void TerminalOnDisablePatch()
+        {
+            GameObject.Destroy(GameObject.Find("Cruiser Terminal"));
+            GameObject.Destroy(GameObject.Find("terminalPosition"));
         }
     }
 }

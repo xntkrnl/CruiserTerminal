@@ -65,28 +65,44 @@ namespace CruiserTerminal
             }
         }
 
-        internal GameObject FindCanvas()
-        {
-            return GameObject.Find("Environment/HangarShip/Terminal/Canvas/MainContainer");
-        }
-
         internal GameObject CloneCanvas()
         {
-            return Instantiate(FindCanvas(), GameObject.Find("Cruiser Terminal/Canvas").transform);
+            return Instantiate(GameObject.Find("Environment/HangarShip/Terminal/Canvas/MainContainer"), GameObject.Find("Cruiser Terminal/Canvas").transform);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void SetCruiserTerminalInUseServerRPC(bool inUse)
+        {
+            SetCruiserTerminalInUseClientRPC(inUse);
+        }
+
+        [ClientRpc]
+        public void SetCruiserTerminalInUseClientRPC(bool inUse)
+        {
+            cruiserTerminalInUse = inUse;
+            StartCoroutine(waitUntilFrameEndToSetActive(inUse));
+            terminalLight.enabled = inUse;
+            if (inUse)
+            {
+                cruiserTerminalAudio.PlayOneShot(enterTerminalSFX);
+            }
+            else
+            {
+                cruiserTerminalAudio.PlayOneShot(leaveTerminalSFX);
+            }
         }
 
         public void BeginUsingCruiserTerminal()
         {
             if (cruiserTerminalInUse)
+            {
+                interactTrigger.StopSpecialAnimation();
                 return;
+            }
 
+            SetCruiserTerminalInUseServerRPC(true);
             cruiserController.SetVehicleCollisionForPlayer(false, GameNetworkManager.Instance.localPlayerController);
-            cruiserTerminalInUse = true;
-            StartCoroutine(waitUntilFrameEndToSetActive(true));
             terminalScript.BeginUsingTerminal();
-
-            terminalLight.enabled = true;
-            cruiserTerminalAudio.PlayOneShot(enterTerminalSFX);
         }
 
         public void StopUsingCruiserTerminal()
@@ -97,12 +113,10 @@ namespace CruiserTerminal
 
         public void QuitCruiserTerminal()
         {
+            SetCruiserTerminalInUse(false);
             cruiserController.SetVehicleCollisionForPlayer(true, GameNetworkManager.Instance.localPlayerController);
             terminalScript.QuitTerminal();
             interactTrigger.StopSpecialAnimation();
-
-            terminalLight.enabled = false;
-            cruiserTerminalAudio.PlayOneShot(leaveTerminalSFX);
         }
 
         private void OnEnable()
@@ -128,7 +142,6 @@ namespace CruiserTerminal
         {
             yield return new WaitForEndOfFrame();
             canvasMainContainer.SetActive(active);
-
         }
     }
 }
