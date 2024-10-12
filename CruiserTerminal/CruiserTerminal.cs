@@ -113,7 +113,7 @@ namespace CruiserTerminal
 
         public void QuitCruiserTerminal()
         {
-            SetCruiserTerminalInUse(false);
+            SetCruiserTerminalInUseServerRPC(false);
             cruiserController.SetVehicleCollisionForPlayer(true, GameNetworkManager.Instance.localPlayerController);
             terminalScript.QuitTerminal();
             interactTrigger.StopSpecialAnimation();
