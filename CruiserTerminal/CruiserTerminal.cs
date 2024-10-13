@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,6 +8,9 @@ namespace CruiserTerminal
 {
     public class CruiserTerminal : NetworkBehaviour
     {
+        internal static CruiserTerminal Instance { get; private set; }
+        public static event Action<bool> cruiserTerminalEvent;
+
         public bool cruiserTerminalInUse;
         public GameObject canvasMainContainer;
         public Terminal terminalScript;
@@ -21,6 +25,17 @@ namespace CruiserTerminal
         public AudioClip leaveTerminalSFX;
         public Light terminalLight;
         public VehicleController cruiserController;
+
+        public override void OnNetworkSpawn()
+        {
+            cruiserTerminalEvent = null;
+
+            if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
+                Instance?.gameObject.GetComponent<NetworkObject>().Despawn();
+            Instance = this;
+
+            base.OnNetworkSpawn();
+        }
 
         private void Awake()
         {
@@ -71,14 +86,16 @@ namespace CruiserTerminal
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void SetCruiserTerminalInUseServerRPC(bool inUse)
+        public void SetCruiserTerminalInUseServerRpc(bool inUse)
         {
-            SetCruiserTerminalInUseClientRPC(inUse);
+            CTPlugin.mls.LogMessage("sending stuff to clients");
+            EventSetCruiserTerminalInUseClientRpc(inUse);
         }
 
         [ClientRpc]
-        public void SetCruiserTerminalInUseClientRPC(bool inUse)
+        public void EventSetCruiserTerminalInUseClientRpc(bool inUse)
         {
+            CTPlugin.mls.LogMessage("cruiser terminal in use: " + inUse);
             cruiserTerminalInUse = inUse;
             StartCoroutine(waitUntilFrameEndToSetActive(inUse));
             terminalLight.enabled = inUse;
@@ -90,6 +107,7 @@ namespace CruiserTerminal
             {
                 cruiserTerminalAudio.PlayOneShot(leaveTerminalSFX);
             }
+            cruiserTerminalEvent.Invoke(inUse);
         }
 
         public void BeginUsingCruiserTerminal()
@@ -100,7 +118,7 @@ namespace CruiserTerminal
                 return;
             }
 
-            SetCruiserTerminalInUseServerRPC(true);
+            SetCruiserTerminalInUseServerRpc(true);
             cruiserController.SetVehicleCollisionForPlayer(false, GameNetworkManager.Instance.localPlayerController);
             terminalScript.BeginUsingTerminal();
         }
@@ -113,7 +131,7 @@ namespace CruiserTerminal
 
         public void QuitCruiserTerminal()
         {
-            SetCruiserTerminalInUseServerRPC(false);
+            SetCruiserTerminalInUseServerRpc(false);
             cruiserController.SetVehicleCollisionForPlayer(true, GameNetworkManager.Instance.localPlayerController);
             terminalScript.QuitTerminal();
             interactTrigger.StopSpecialAnimation();

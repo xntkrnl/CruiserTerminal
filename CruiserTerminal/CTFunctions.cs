@@ -24,11 +24,18 @@ namespace CruiserTerminal
             GameObject terminalPosition = GameObject.Instantiate(CTPlugin.mainAssetBundle.LoadAsset("terminalPosition.prefab") as GameObject);
             terminalPosition.name = "terminalPosition";
 
-            if (NetworkManager.Singleton.IsHost)
+            if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
                 terminal.GetComponent<NetworkObject>().Spawn();
 
             if (NetworkManager.Singleton.IsClient)
-                GameObject.Destroy(GameObject.Find("Cruiser Terminal(Clone)")); //strange duplication bug
+                try
+                {
+                    GameObject.Destroy(GameObject.Find("Cruiser Terminal(Clone)")); //strange duplication bug
+                }
+                catch
+                {
+                    
+                }
 
             terminalPosition.transform.SetParent(cruiser.transform);
             terminalPosition.transform.localPosition = new Vector3(1.293f, 0.938f, -3.274f);
